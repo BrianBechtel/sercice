@@ -67,7 +67,7 @@ pipeline {
           withCredentials([kubeconfigContent(credentialsId : 'kubeconfig' ,variable : 'KUBECONFIG_CONFIG' ,)]) {
             sh 'mkdir -p ~/.kube/'
             sh 'echo "$KUBECONFIG_CONFIG" > ~/.kube/config'
-            sh 'envsubst < deploy/dev-ol/deploy.yaml | kubectl apply -f -'
+            sh 'envsubst < deploy/dev/deploy.yaml | kubectl apply -f -'
           }
 
         }
@@ -89,7 +89,7 @@ pipeline {
                     credentialsId: env.KUBECONFIG_CREDENTIAL_ID,
                     variable: 'KUBECONFIG')
                     ]) {
-                    sh 'envsubst < deploy/prod-all-in-one/devops-sample.yaml | kubectl apply -f -'
+                    sh 'envsubst < deploy/prod-ol/deploy.yaml | kubectl apply -f -'
                 }
             }
           }
