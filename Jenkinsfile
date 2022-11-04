@@ -59,23 +59,21 @@ pipeline {
            }
         }
 
-        stage('deploy to dev') {
-          when{
-            branch 'master'
+    stage('deploy to dev') {
+      agent none
+      steps {
+        container('maven') {
+          input(id: 'deploy-to-dev', message: 'deploy to dev?')
+          withCredentials([kubeconfigContent(credentialsId : 'kubeconfig' ,variable : 'KUBECONFIG_CONFIG' ,)]) {
+            sh 'mkdir -p ~/.kube/'
+            sh 'echo "$KUBECONFIG_CONFIG" > ~/.kube/config'
+            sh 'envsubst < deploy/dev-ol/deploy.yaml | kubectl apply -f -'
           }
-          steps {
-            input(id: 'deploy-to-dev', message: 'deploy to dev?')
-            container ('maven') {
-                withCredentials([
-                    kubeconfigFile(
-                    credentialsId: env.KUBECONFIG_CREDENTIAL_ID,
-                    variable: 'KUBECONFIG')
-                    ]) {
-                    sh 'envsubst < deploy/dev-all-in-one/devops-sample.yaml | kubectl apply -f -'
-                }
-            }
-          }
+
         }
+
+      }
+    }
         stage('push with tag'){
           when{
             expression{
