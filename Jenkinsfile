@@ -75,7 +75,7 @@ pipeline {
       }
     }
 
-    stage('deploy to dev') {
+    stage('deploy to production') {
       agent none
       steps {
         container('maven') {
