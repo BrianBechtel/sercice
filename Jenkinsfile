@@ -75,24 +75,20 @@ pipeline {
       }
     }
 
-        stage('deploy to production') {
-          when{
-            expression{
-              return params.TAG_NAME =~ /v.*/
-            }
+    stage('deploy to dev') {
+      agent none
+      steps {
+        container('maven') {
+          input(id: 'deploy-to-production', message: 'deploy to production?')
+          withCredentials([kubeconfigContent(credentialsId : 'kubeconfig' ,variable : 'KUBECONFIG_CONFIG' ,)]) {
+            sh 'mkdir -p ~/.kube/'
+            sh 'echo "$KUBECONFIG_CONFIG" > ~/.kube/config'
+            sh 'envsubst < deploy/prod-ol/deploy.yaml | kubectl apply -f -'
           }
-          steps {
-            input(id: 'deploy-to-production', message: 'deploy to production?')
-            container ('maven') {
-                withCredentials([
-                    kubeconfigFile(
-                    credentialsId: env.KUBECONFIG_CREDENTIAL_ID,
-                    variable: 'KUBECONFIG')
-                    ]) {
-                    sh 'envsubst < deploy/prod-ol/deploy.yaml | kubectl apply -f -'
-                }
-            }
-          }
+
         }
+
+      }
+    }
     }
 }
